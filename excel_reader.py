@@ -30,6 +30,9 @@ def generate_base_queries(file_name,output_file):
     if not df.empty:
         # Group the DataFrame by the 'Group', 'Source Table', and 'Target Table' columns
         grouped = df.groupby([GROUP, SOURCE_SCHEMA, SOURCE_TABLE, TARGET_TABLE])
+        print("grouped df:\n")
+        for key, item in grouped:
+            print(grouped.get_group(key), "\n\n")
         # Open the output file
         with open(output_file, 'w') as f:
             f.write("-- All Base Queries " + '\n')
