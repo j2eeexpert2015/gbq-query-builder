@@ -52,7 +52,7 @@ def generate_base_queries(file_name,output_file):
                 target_columns = ', '.join([f"{col}" for col in column_values.split(', ')])
                 if join_type_1 =='L':
                     join_type_1='LEFT OUTER JOIN'
-                query =  f"""SELECT DISTINCT \n{source_columns} \nFROM `{source_schema}.{source_table}`  as {source_table_alias} \n {join_type_1} \n {source_schema}.{join_table_1} as {join_table_alias} \n on {source_table_alias}.{join_column1}={join_table_alias}.{join_column1} \n EXCEPT \n DISTINCT \nSELECT {target_columns} \nFROM `{target_table}`;\n"""
+                query =  f"""SELECT DISTINCT \n{source_columns} \nFROM `{source_schema}.{source_table}`  as {source_table_alias} \n {join_type_1} \n `{source_schema}.{join_table_1}` as {join_table_alias} \n on {source_table_alias}.{join_column1}={join_table_alias}.{join_column1} \n EXCEPT \n DISTINCT \nSELECT {target_columns} \nFROM `{target_table}`;\n"""
 
                 # Print the SQL query
                 #print(query)
