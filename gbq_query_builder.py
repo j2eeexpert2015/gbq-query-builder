@@ -3,7 +3,6 @@ import pandas as pd
 import sys
 
 def validate_column_presence(file_name):
-    print("Validating column presence ")
     # Read the Excel file
     df = pd.read_excel(file_name)
     #list for missing columns in the input file
@@ -39,6 +38,8 @@ def generate_base_queries(file_name,output_file):
         # Open the output file
         with open(output_file, 'w') as f:
             f.write("-- All Base Queries " + '\n')
+            source_table_alias='s'
+            join_table_alias = 'j'
             # Iterate over each group
             for (group, source_schema, source_table,join_table_1,join_column1,join_type_1 ,target_table), group_df in grouped:
                 # Check if the source table and target table are the same for all rows in the group
@@ -46,11 +47,12 @@ def generate_base_queries(file_name,output_file):
                     print(f"Source Table ,Target Table and JOIN Table are not the same for all rows in group {group}. Skipping.")
                     continue
                 # Combine the Source Column values into a comma-separated string
-                source_column_values = ', '.join(group_df[SOURCE_COLUMN].astype(str))
-                columns = ', '.join([f"{col}" for col in source_column_values.split(', ')])
+                column_values = ', '.join(group_df[SOURCE_COLUMN].astype(str))
+                source_columns = ', '.join([f"{source_table_alias}.{col}" for col in column_values.split(', ')])
+                target_columns = ', '.join([f"{col}" for col in column_values.split(', ')])
                 if join_type_1 =='L':
                     join_type_1='LEFT OUTER JOIN'
-                query =  f"""SELECT DISTINCT \n{columns} \nFROM {source_schema}.{source_table}  as A \n {join_type_1} \n {source_schema}.{join_table_1} B \n on A.{join_column1}=B.{join_column1} \n EXCEPT \n DISTINCT \nSELECT {columns} \nFROM {target_table};\n"""
+                query =  f"""SELECT DISTINCT \n{source_columns} \nFROM `{source_schema}.{source_table}`  as {source_table_alias} \n {join_type_1} \n {source_schema}.{join_table_1} as {join_table_alias} \n on {source_table_alias}.{join_column1}={join_table_alias}.{join_column1} \n EXCEPT \n DISTINCT \nSELECT {target_columns} \nFROM `{target_table}`;\n"""
 
                 # Print the SQL query
                 #print(query)
@@ -79,7 +81,7 @@ def generate_self_queries(file_name, output_file):
                 target2 = row[TARGET_COLUMN]
 
                 # Form the SQL query
-                query = f"""SELECT {target1}, {target2} \nCASE WHEN {target1} = {target2} THEN 'False' \nELSE 'True' \nEND \nFROM {target_table};\n"""
+                query = f"""SELECT {target1}, {target2} \nCASE WHEN {target1} = {target2} THEN 'False' \nELSE 'True' \nEND \nFROM `{target_table}`;\n"""
                 #print(query)
                 # Write the SQL query to the output file
                 f.write(query + '\n')
