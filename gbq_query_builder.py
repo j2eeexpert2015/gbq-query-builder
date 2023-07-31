@@ -81,7 +81,7 @@ def generate_self_queries(file_name, output_file):
                 target2 = row[TARGET_COLUMN]
 
                 # Form the SQL query
-                query = f"""SELECT {target1}, {target2} \nCASE WHEN {target1} = {target2} THEN 'False' \nELSE 'True' \nEND \nFROM `{target_table}`;\n"""
+                query = f"""SELECT {target1}, {target2} , \nCASE WHEN {target1} = {target2} THEN 'False' \nELSE 'True' \nEND \nFROM `{target_table}`;\n"""
                 #print(query)
                 # Write the SQL query to the output file
                 f.write(query + '\n')
