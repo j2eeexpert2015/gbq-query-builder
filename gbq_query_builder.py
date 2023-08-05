@@ -64,7 +64,7 @@ def generate_base_queries(file_name,output_file):
     print("generate_base_queries .... completed ")
 
 
-def generate_self_queries(file_name, output_file):
+def generate_self_queries_old(file_name, output_file):
     print("generate_self_queries .... started ")
     # Read the Excel file
     df = pd.read_excel(file_name)
@@ -82,6 +82,36 @@ def generate_self_queries(file_name, output_file):
 
                 # Form the SQL query
                 query = f"""SELECT {target1}, {target2} , \nCASE WHEN {target1} = {target2} THEN 'False' \nELSE 'True' \nEND \nFROM `{target_table}`;\n"""
+                #print(query)
+                # Write the SQL query to the output file
+                f.write(query + '\n')
+
+    else:
+        print('No entry found for Self queries')
+    print("generate_self_queries .... ended ")
+
+def generate_self_queries(file_name, output_file):
+    print("generate_self_queries .... started ")
+    # Read the Excel file
+    df = pd.read_excel(file_name)
+    # Filter the DataFrame based on the 'Source Type' column
+    df = df.loc[df[SOURCE_TYPE] == SOURCE_TYPE_SELF_VALUE]
+    if not df.empty:
+        # Open the output file
+        with open(output_file, 'a') as f:
+            f.write("-- All Self Queries " + '\n')
+            # Iterate over each row
+            for index, row in df.iterrows():
+                target_table = row[TARGET_TABLE]
+                target1 = row[TRANSFORMATION_RULE]
+                target2 = row[TARGET_COLUMN]
+
+                # Form the SQL query
+                query = f"""select * from ( SELECT {target1}, {target2} , 
+                CASE WHEN {target1} = {target2} THEN 'True' 
+                ELSE 'False' 
+                END as CHKSUM_VAL 
+                FROM `{target_table}` ) where CHKSUM_VAL= 'False';\n"""
                 #print(query)
                 # Write the SQL query to the output file
                 f.write(query + '\n')
